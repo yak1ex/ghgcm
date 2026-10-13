@@ -13,24 +13,23 @@ Build a Windows-focused Python CLI, managed with uv, that safely inventories and
 
 ## Current status
 
-The project scaffold and read-only Milestone 1 prototype are implemented with standard-library Windows API bindings and synthetic unit tests. Live Windows Credential Manager behavior has not been exercised by the agent and awaits user verification.
+The project scaffold and read-only Milestone 1 inventory is verified with standard-library Windows API bindings, synthetic unit tests, and user-run checks on three Windows hosts. Live enumeration, target recognition, exact-secret grouping, secret-safe output, and successful exit status are confirmed. Persistent group configuration and drift auditing are now active design work.
 
 ## Current plan
 
-1. `T006` — Verify read-only inventory against a user-controlled Windows GCM environment.
-2. `T007` — Design persistent repository-to-group configuration and consistency audits.
-3. `T008` — Validate a supported GCM mutation path, then design and implement authorized safe rotation.
-4. `T009` — Investigate and implement an explicit DPAPI backend adapter.
+1. `T007` — Design persistent repository-to-group configuration and consistency audits.
+2. `T008` — Validate a supported GCM mutation path, then design and implement authorized safe rotation.
+3. `T009` — Investigate and implement an explicit DPAPI backend adapter.
 
-- Selection basis: Milestone 1 implementation and synthetic verification precede live verification; rotation is explicitly gated on successful inventory verification.
-- Last reviewed: 2026-10-11
+- Selection basis: Live inventory verification is complete; persistent intended-group configuration and drift auditing must be designed before rotation.
+- Last reviewed: 2026-10-13
 
 ## Active work
 
-- Task: `T006`
-- Current step: Await user-side live Windows verification using the README procedure.
-- Waiting on: `user`
-- Required action: Run the documented inventory command and report the exit code and pass/fail results without sharing credential values.
+- Task: `T007`
+- Current step: Define persistent intended-group configuration and drift audit behavior for repositories that should share credentials.
+- Waiting on: none
+- Required action: None.
 
 ## Tasks
 
@@ -123,7 +122,7 @@ The project scaffold and read-only Milestone 1 prototype are implemented with st
 
 ### T006 — Windows integration verification
 
-- Status: in progress
+- Status: completed
 - Objective: Confirm the read-only prototype matches actual GCM wincredman entries on Windows.
 - Scope:
   - User-run inventory comparison, duplicate grouping check, secrecy check, and error/exit-code observation.
@@ -132,15 +131,20 @@ The project scaffold and read-only Milestone 1 prototype are implemented with st
 - Implemented:
   - Added a concrete user-side verification procedure to `README.md`.
 - Verification:
-  - Automated checks passed; awaiting user verification of live Windows integration.
+  - Automated checks passed on 2026-10-11.
+  - User-run inventory on three Windows hosts on 2026-10-12 reported 2, 2, and 30 supported entries respectively, zero unrecognized GitHub entries, no exposed secret material, and exit code 0.
+  - Live results included both host-level and path-specific targets, optional `LegacyGeneric:target=` prefixes, singleton groups, and multi-entry exact-secret groups.
+  - User confirmed on 2026-10-13 that targets reported in the same temporary group share the same Credential Manager credential in practice.
+  - User identified the nine-group result as expected drift caused by credentials fetched at different times; the intended managed state has two credential groups, with one SSO-enabled GitHub token shared across orgA, orgB, and orgD.
 - Remaining:
-  - Run and report the documented live checks without pasting secrets.
+  - None.
 - Notes:
-  - This task remains in progress under the template completion policy.
+  - Different groups mean the stored credential blobs differ byte-for-byte; they do not by themselves establish whether the operational account-to-credential assignment is intended.
+  - The third host's split across nine secret groups is confirmed credential drift relative to the intended two-group policy. Detecting that policy mismatch belongs to T007's persistent configuration and audit design.
 
 ### T007 — Design group configuration and audit
 
-- Status: pending
+- Status: in progress
 - Objective: Define persistent repository-to-credential-group mapping and consistency audit behavior without storing secret-derived identifiers.
 - Scope:
   - Configuration schema, repository identity rules, drift detection, validation, and safe report design.
@@ -151,7 +155,7 @@ The project scaffold and read-only Milestone 1 prototype are implemented with st
 - Verification:
   - Not run.
 - Remaining:
-  - Begin after T006 verification.
+  - Define the configuration schema, repository identity rules, safe drift findings, and validation behavior.
 - Notes:
   - Persistent group identity must be user-configured and independent of token content.
 
@@ -168,7 +172,7 @@ The project scaffold and read-only Milestone 1 prototype are implemented with st
 - Verification:
   - Not run.
 - Remaining:
-  - T006 and T007 must complete first; validate GCM mutation behavior before implementation.
+  - T007 must complete first; validate GCM mutation behavior before implementation.
 - Notes:
   - No live mutation is authorized by the current project bootstrap request.
 
@@ -228,12 +232,12 @@ The project scaffold and read-only Milestone 1 prototype are implemented with st
 - Decision: Do not implement rotation until T006 live read-only inventory verification is complete.
 - Rationale: Mutation must not build on an unverified interpretation of live credential storage.
 - Consequences:
-  - T008 remains pending even though its requirements are known.
+  - The live inventory gate is satisfied; T008 remains pending behind T007's configuration and audit design.
 - Related tasks: `T006`, `T008`
 
 ## Blocked items
 
-- None. T006 is awaiting user verification rather than blocked.
+- None.
 
 ## Cancelled items
 

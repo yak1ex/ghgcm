@@ -49,7 +49,7 @@ This verification reads live credential metadata and secret values into this loc
 2. Confirm the listed targets correspond to GitHub entries visible in Windows Credential Manager.
 3. If you know two repository-specific entries use the same token, confirm they appear in the same temporary group.
 4. Confirm no token, token substring, or fingerprint appears in standard output or standard error.
-5. Report the command's exit code and whether each check passed. Do not paste credential values.
+5. Immediately after the inventory command, run `Write-Output $LASTEXITCODE`. Report that numeric exit code and whether each check passed. Do not paste credential values. (`$LASTEXITCODE` is the exit code of the most recent native program, which is `uv` here; `$?` reports only a Boolean success status.)
 
 An empty vault is a successful inventory with zero entries. Malformed or unsupported GitHub-shaped GCM entries are listed under `Unrecognized GitHub entries`; unrelated credentials are ignored. Windows API errors produce a nonzero exit code and a numeric Windows error code.
 
