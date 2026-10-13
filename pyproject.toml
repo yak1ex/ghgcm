@@ -1,0 +1,12 @@
+[project]
+name = "github-credential-groups"
+version = "0.1.0"
+description = "Read-only inventory of GitHub credentials stored by GCM on Windows"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "GitHub Credential Group Manager contributors" }]
+dependencies = []
+
+[tool.uv]
+package = false
