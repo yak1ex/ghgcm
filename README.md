@@ -33,6 +33,33 @@ Unrecognized GitHub entries: 0
 
 Group numbers are rebuilt for every invocation and are not suitable as persistent identifiers. The command enumerates the current user's vault through `CredEnumerateW`; it does not write, update, or delete credentials.
 
+## Configure and audit intended groups
+
+Create a TOML file whose group names are stable user-chosen identifiers and whose repositories use `owner/repository` form:
+
+```toml
+version = 1
+backend = "wincredman"
+
+[[groups]]
+name = "shared-sso"
+repositories = ["orgA/repository-one", "orgB/repository-two", "orgD/repository-three"]
+
+[[groups]]
+name = "personal"
+repositories = ["example/personal-repository"]
+```
+
+Run the read-only audit with an explicit backend:
+
+```powershell
+uv run python -m github_credential_groups.cli audit --backend wincredman --config .\groups.toml
+```
+
+Repository matching is case-insensitive because GitHub owner and repository names are case-insensitive. Each repository may belong to exactly one configured group. The audit reports a missing repository when no supported path-specific credential exists and a split group when its observed credential blobs are not all byte-for-byte equal. Host-level targets such as `git:https://github.com` do not identify a repository and cannot satisfy configured membership. Unknown group fields, duplicate group names or repository assignments, unsupported backends, and malformed repository identities are rejected.
+
+Output contains group names and configured repository identities only. It contains no credential value, fragment, hash, fingerprint, or temporary inventory group label. Exit status is `0` for a consistent policy, `3` when drift is found, and `1` for configuration, enumeration, or operating-system errors.
+
 ## Tests
 
 ```powershell
@@ -55,4 +82,4 @@ An empty vault is a successful inventory with zero entries. Malformed or unsuppo
 
 ## Scope
 
-Persistent group configuration, audits, rotation, and DPAPI support are planned milestones. Rotation will not be implemented until live read-only inventory behavior has been verified. See [TASKS.md](TASKS.md) and [docs/gcm-wincredman-research.md](docs/gcm-wincredman-research.md).
+Rotation and DPAPI support are planned milestones. See [TASKS.md](TASKS.md) and [docs/gcm-wincredman-research.md](docs/gcm-wincredman-research.md).

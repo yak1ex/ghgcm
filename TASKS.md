@@ -13,21 +13,20 @@ Build a Windows-focused Python CLI, managed with uv, that safely inventories and
 
 ## Current status
 
-The project scaffold and read-only Milestone 1 inventory is verified with standard-library Windows API bindings, synthetic unit tests, and user-run checks on three Windows hosts. Live enumeration, target recognition, exact-secret grouping, secret-safe output, and successful exit status are confirmed. Persistent group configuration and drift auditing are now active design work.
+The project scaffold and read-only Milestone 1 inventory is verified with standard-library Windows API bindings, synthetic unit tests, and user-run checks on three Windows hosts. Live enumeration, target recognition, exact-secret grouping, secret-safe output, and successful exit status are confirmed. Persistent group configuration and drift auditing are implemented and synthetically verified.
 
 ## Current plan
 
-1. `T007` — Design persistent repository-to-group configuration and consistency audits.
-2. `T008` — Validate a supported GCM mutation path, then design and implement authorized safe rotation.
-3. `T009` — Investigate and implement an explicit DPAPI backend adapter.
+1. `T008` — Validate a supported GCM mutation path, then design and implement authorized safe rotation.
+2. `T009` — Investigate and implement an explicit DPAPI backend adapter.
 
-- Selection basis: Live inventory verification is complete; persistent intended-group configuration and drift auditing must be designed before rotation.
+- Selection basis: Persistent intended-group configuration and audit are complete; rotation research is next.
 - Last reviewed: 2026-10-13
 
 ## Active work
 
-- Task: `T007`
-- Current step: Define persistent intended-group configuration and drift audit behavior for repositories that should share credentials.
+- Task: `T008`
+- Current step: Research and validate a GCM-supported mutation path before designing rotation behavior.
 - Waiting on: none
 - Required action: None.
 
@@ -144,24 +143,26 @@ The project scaffold and read-only Milestone 1 inventory is verified with standa
 
 ### T007 — Design group configuration and audit
 
-- Status: in progress
+- Status: completed
 - Objective: Define persistent repository-to-credential-group mapping and consistency audit behavior without storing secret-derived identifiers.
 - Scope:
   - Configuration schema, repository identity rules, drift detection, validation, and safe report design.
 - Acceptance criteria:
   - Design covers malformed configuration, missing members, split secrets, and backend-explicit operation with synthetic tests.
 - Implemented:
-  - None.
+  - Added a versioned, backend-explicit TOML schema with stable user-chosen group names and case-insensitive `owner/repository` identities.
+  - Added strict configuration validation and read-only audit findings for missing members and groups split across different credential blobs.
+  - Added a secret-safe `audit` CLI with distinct success, drift, and error exit statuses and documented its behavior and limitations.
 - Verification:
-  - Not run.
+  - Full synthetic unit suite, source compilation, and diff whitespace check passed on 2026-10-13.
 - Remaining:
-  - Define the configuration schema, repository identity rules, safe drift findings, and validation behavior.
+  - None.
 - Notes:
   - Persistent group identity must be user-configured and independent of token content.
 
 ### T008 — Design and implement safe rotation
 
-- Status: pending
+- Status: in progress
 - Objective: Replace a token for an explicitly selected group with dry-run, verification, recovery, and partial-failure reporting.
 - Scope:
   - Research GCM-supported mutation interfaces, authorization boundary, recovery journal design, and synthetic failure tests.
@@ -172,7 +173,7 @@ The project scaffold and read-only Milestone 1 inventory is verified with standa
 - Verification:
   - Not run.
 - Remaining:
-  - T007 must complete first; validate GCM mutation behavior before implementation.
+  - Validate GCM mutation behavior, define authorization and recovery behavior, then implement and test rotation.
 - Notes:
   - No live mutation is authorized by the current project bootstrap request.
 
@@ -232,7 +233,7 @@ The project scaffold and read-only Milestone 1 inventory is verified with standa
 - Decision: Do not implement rotation until T006 live read-only inventory verification is complete.
 - Rationale: Mutation must not build on an unverified interpretation of live credential storage.
 - Consequences:
-  - The live inventory gate is satisfied; T008 remains pending behind T007's configuration and audit design.
+  - The live inventory gate and T007 configuration prerequisite are satisfied.
 - Related tasks: `T006`, `T008`
 
 ## Blocked items
